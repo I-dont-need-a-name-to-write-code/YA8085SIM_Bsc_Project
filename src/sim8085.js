@@ -302,17 +302,18 @@ class CPU_Context {
         this.set_RP(rp_idx, this.get_RP(rp_idx) - 1);
     }
 
-    handle_Status_Flags_Ex_CY(new_val) {
+    handle_Status_Flags_Ex_AC_CY(new_val) {
         let reg = new_val;
+        // keep CY and AC as it is 
         let cy = this.get_Flag(FLAG_CY);
+        let ac = this.get_Flag(FLAG_AC);
         this.flag.fill(0);
         this.set_Flag(FLAG_CY, cy);
+        this.set_Flag(FLAG_AC, ac);
         // sign flag
         if((reg & 0x80) > 0) this.set_Flag(FLAG_S, 1);
         // zero flag
         if(reg === 0) this.set_Flag(FLAG_Z, 1);
-        // auxilliary carry flag
-        if((reg & 0x10) > 0) this.set_Flag(FLAG_AC, 1);
         // parity flag
         let temp = reg;
         let even = 1;
@@ -323,17 +324,27 @@ class CPU_Context {
         this.set_Flag(FLAG_P, even);
     }
 
-    handle_Carry_Flag(new_val, old_val, instr_type) {
-        let cond = [ instr_type === INSTR_TY_ADD && new_val < old_val, 
-                     instr_type === INSTR_TY_SUB && new_val > old_val ];
+    handle_AC_CY_Flag(new_val, old_val, instr_type) {
+        // auxilliary carry flag
+        let old_ln = old_val & 0x0F;
+        let new_ln = new_val & 0x0F;
+        let cond_ac = [ instr_type === INSTR_TY_ADD && new_ln < old_ln, 
+                        instr_type === INSTR_TY_SUB && new_ln > old_ln ];
+        let ac = 0;
+        cond_ac.forEach(a => ac |= Number(a));
+        this.set_Flag(FLAG_AC, ac);
+
+        // carry flag
+        let cond_cy = [ instr_type === INSTR_TY_ADD && new_val < old_val, 
+                        instr_type === INSTR_TY_SUB && new_val > old_val ];
         let cy = 0;
-        cond.forEach(c => cy |= Number(c));
+        cond_cy.forEach(c => cy |= Number(c));
         this.set_Flag(FLAG_CY, cy);
     }
 
     handle_Status_Flags(new_val, old_val, instr_type) {
-        this.handle_Status_Flags_Ex_CY(new_val);
-        this.handle_Carry_Flag(new_val, old_val, instr_type);
+        this.handle_Status_Flags_Ex_AC_CY(new_val);
+        this.handle_AC_CY_Flag(new_val, old_val, instr_type);
     }
     
     add(value) {
@@ -396,7 +407,7 @@ class CPU_Context {
 
     and(value) {
         this.register[REG_A] &= value;
-        this.handle_Status_Flags_Ex_CY(this.register[REG_A]);
+        this.handle_Status_Flags_Ex_AC_CY(this.register[REG_A]);
         this.set_Flag(FLAG_AC, 1);
         this.set_Flag(FLAG_CY, 0);
     }
@@ -411,7 +422,7 @@ class CPU_Context {
     
     xor(value) {
         this.register[REG_A] ^= value;
-        this.handle_Status_Flags_Ex_CY(this.register[REG_A]);
+        this.handle_Status_Flags_Ex_AC_CY(this.register[REG_A]);
         this.set_Flag(FLAG_AC, 0);
         this.set_Flag(FLAG_CY, 0);
     }
@@ -426,7 +437,7 @@ class CPU_Context {
 
     or(value) {
         this.register[REG_A] |= value;
-        this.handle_Status_Flags_Ex_CY(this.register[REG_A]);
+        this.handle_Status_Flags_Ex_AC_CY(this.register[REG_A]);
         this.set_Flag(FLAG_AC, 0);
         this.set_Flag(FLAG_CY, 0);
     }
@@ -1234,14 +1245,21 @@ const handle_instruction = (cpu, instr) => {
             break;
         }
         case INSTR_DAA: {
-            let acc_l = cpu.get_Reg(REG_A) & 0x0F;
-            if((acc_l > 9) || (cpu.get_Flag(FLAG_AC) === 1)) {
-                cpu.add(0b0000_0110);
+            let old_acc = cpu.get_Reg(REG_A);
+            let acc_ln = cpu.get_Reg(REG_A) & 0x0F;
+            if((acc_ln > 9) || (cpu.get_Flag(FLAG_AC) === 1)) {
+                cpu.register[REG_A] += 0x06;
             }
-            let acc_h = (cpu.get_Reg(REG_A) >> 4) & 0x0F;
-            if((acc_h > 9) || (cpu.get_Flag(FLAG_CY) === 1)) {
-                cpu.add(0b0110_0000);
+            let acc_hn = (cpu.get_Reg(REG_A) >> 4) & 0x0F;
+            let cy = cpu.get_Flag(FLAG_CY);
+            if((acc_hn > 9) || (cy === 1)) {
+                cpu.add(0x60);
             }
+            let curr_cy = cpu.get_Flag(FLAG_CY);
+            if((curr_cy === 1) || (cy === 1)) {
+                cpu.set_Flag(FLAG_CY, 1);
+            }
+            break;
         }
         case INSTR_NOP: { 
             break; 

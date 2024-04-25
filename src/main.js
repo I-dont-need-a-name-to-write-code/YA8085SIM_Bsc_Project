@@ -24,12 +24,11 @@ const execute_program = (cpu, prog_addr) => {
 
 let prog_start = 0xF000;
 prog = [
-    INSTR_MVI_A, 0xaa,
-    INSTR_DAA,
+    INSTR_MVI_A, 30,
+    INSTR_MVI_B, 20,
+    INSTR_SUB_B,
     INSTR_HLT
 ];
-
-// NOTE: IMPLEMENT DAA
 
 const main = () => {
     global.cpu_ctx.copy_To_Mem(prog_start, prog);
