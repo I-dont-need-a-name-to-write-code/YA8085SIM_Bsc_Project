@@ -1245,20 +1245,23 @@ const handle_instruction = (cpu, instr) => {
             break;
         }
         case INSTR_DAA: {
-            let old_acc = cpu.get_Reg(REG_A);
-            let acc_ln = cpu.get_Reg(REG_A) & 0x0F;
-            if((acc_ln > 9) || (cpu.get_Flag(FLAG_AC) === 1)) {
+            let p_acc_ln = cpu.get_Reg(REG_A) & 0x0F;
+            if((p_acc_ln > 9) || (cpu.get_Flag(FLAG_AC) === 1)) {
                 cpu.register[REG_A] += 0x06;
             }
-            let acc_hn = (cpu.get_Reg(REG_A) >> 4) & 0x0F;
-            let cy = cpu.get_Flag(FLAG_CY);
-            if((acc_hn > 9) || (cy === 1)) {
-                cpu.add(0x60);
+            let a_acc_ln = cpu.get_Reg(REG_A) & 0x0F;
+            if(a_acc_ln < p_acc_ln) {
+                cpu.set_Flag(FLAG_AC, 1);
             }
-            let curr_cy = cpu.get_Flag(FLAG_CY);
-            if((curr_cy === 1) || (cy === 1)) {
+            let p_acc_hn = (cpu.get_Reg(REG_A) >> 4) & 0x0F;
+            if((p_acc_hn > 9) || (cpu.get_Flag(FLAG_CY) === 1)) {
+                cpu.register[REG_A] += 0x60;
+            }
+            let a_acc_hn = (cpu.get_Reg(REG_A) >> 4) & 0x0F;
+            if(a_acc_hn < p_acc_hn) {
                 cpu.set_Flag(FLAG_CY, 1);
             }
+            cpu.handle_Status_Flags_Ex_AC_CY(cpu.get_Reg(REG_A));
             break;
         }
         case INSTR_NOP: { 

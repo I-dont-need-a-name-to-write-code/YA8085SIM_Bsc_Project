@@ -24,9 +24,10 @@ const execute_program = (cpu, prog_addr) => {
 
 let prog_start = 0xF000;
 prog = [
-    INSTR_MVI_A, 30,
-    INSTR_MVI_B, 20,
-    INSTR_SUB_B,
+    INSTR_MVI_A, 0x44,
+    INSTR_MVI_B, 0x42,
+    INSTR_ADD_B,
+    INSTR_DAA,
     INSTR_HLT
 ];
 
