@@ -61,8 +61,6 @@ const RP_CODE_TO_IDX = [
 // ENUMS
 const INSTR_TY_ADD = iota++;
 const INSTR_TY_SUB = iota++;
-0
-1
 
 const MSG_TY_DFLT = iota++;
 const MSG_TY_EXEC = iota++;
