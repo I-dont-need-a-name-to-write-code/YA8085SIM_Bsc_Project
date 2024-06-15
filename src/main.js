@@ -1,4 +1,6 @@
 
+
+
 let global = {
     cpu_ctx: new CPU_Context(),
     runner_worker_handle: new Worker("runner_worker.js"),
@@ -22,18 +24,27 @@ const execute_program = (cpu, prog_addr) => {
     return true;
 }; 
 
-let prog_start = 0xF000;
-prog = [
-    INSTR_MVI_A, 0x44,
-    INSTR_MVI_B, 0x42,
-    INSTR_ADD_B,
-    INSTR_DAA,
-    INSTR_HLT
-];
+function enable_Tab(id) {
+    var el = document.getElementById(id);
+    el.onkeydown = function(e) {
+        if (e.keyCode === 9) { // tab was pressed
+            // get caret position/selection
+            var val = this.value,
+                start = this.selectionStart,
+                end = this.selectionEnd;
+            // set textarea value to: text before caret + tab + text after caret
+            this.value = val.substring(0, start) + '\t' + val.substring(end);
+            // put caret at right position again
+            this.selectionStart = this.selectionEnd = start + 1;
+            // prevent the focus lose
+            return false;
+        }
+    };
+}
 
 const main = () => {
-    global.cpu_ctx.copy_To_Mem(prog_start, prog);
-    execute_program(global.cpu_ctx, prog_start);
+    let ta_id = "code_area"; 
+    enable_Tab(ta_id);
 };
 
 main();
