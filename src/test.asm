@@ -1,9 +1,9 @@
 # 8 BIT DIVISION
 .ORG 2000H
-	   LHLD 2501
-	   LDA 2503
+	   LHLD 2501h
+	   LDA 2503h
 	   MOV B , A
-	   MVI C,08
+	   MVI C,08h
 
 LOOP:	   DAD H
 	   MOV A, H
@@ -14,12 +14,12 @@ LOOP:	   DAD H
 
 AHEAD:	   DCR C
 	   JNZ LOOP
-	   SHLD 2504
+	   SHLD 2504h
 	   HLT
 
 .ORG 2501H
 # LSB OF DIVIDEND , MSB OF DIVIDEND , DIVISOR
-.DB 9BH,48H,1AH	
+.DB 9BH 48H 1AH	
 
 -----------------------------------------------------
 
@@ -27,7 +27,7 @@ AHEAD:	   DCR C
 .org 3000H
 _start:
 	LXI H, array
-	MVI C, M
+	MOV C, M
 	INX H
 	MVI A, 00H
 label1:	ADD M
@@ -39,6 +39,3 @@ label1:	ADD M
 .org 4000H
 array: 
 .db 04H 10H 20H 40H 80H
-
-
-

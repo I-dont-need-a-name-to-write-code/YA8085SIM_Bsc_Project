@@ -1,6 +1,4 @@
 
-
-
 let global = {
     cpu_ctx: new CPU_Context(),
     runner_worker_handle: new Worker("runner_worker.js"),
@@ -42,10 +40,5 @@ function enable_Tab(id) {
     };
 }
 
-const main = () => {
-    let ta_id = "code_area"; 
-    enable_Tab(ta_id);
-};
-
-main();
+enable_Tab('code_area');
 

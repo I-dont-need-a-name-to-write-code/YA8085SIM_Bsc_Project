@@ -1,22 +1,22 @@
 
-let mnumonic_type = [
+let mnemonic_type = [
     "NOP","LXI","STAX","INX","INR","DCR","MVI","RLC","DAD",
     "LDAX","DCX","RRC","RAL","RAR","RIM","SHLD","DAA","LHLD",
     "CMA","SIM","STA","STC","LDA","CMC","MOV","HLT","ADD",
     "ADC","SUB","SBB","ANA","XRA","ORA","CMP","RNZ","POP",
     "JNZ","JMP","CNZ","PUSH","ADI","RZ","RET","JZ","CZ","CALL",
-    "ACI","RNC","JNC","OUT","CNC","PUSH","SUI","RC","JC","IN",
-    "CC","SBI","RPO","JPO","XTHL","CPO","PUSH","ANI","RPE","PCHL",
-    "JPE","XCHG","CPE","XRI","RP","JP", "DI","CP","PUSH","ORI",
+    "ACI","RNC","JNC","OUT","CNC","SUI","RC","JC","IN",
+    "CC","SBI","RPO","JPO","XTHL","CPO","ANI","RPE","PCHL",
+    "JPE","XCHG","CPE","XRI","RP","JP", "DI","CP","ORI",
     "RM","SPHL","JM","EI","CM","CPI","RST"
 ];
 
-let mnumonic_hm = new Map();
-for(let mem of mnumonic_type) {
-    mnumonic_hm.set(mem, 1);
+let mnemonic_hm = new Map();
+for(let mem of mnemonic_type) {
+    mnemonic_hm.set(mem, 1);
 }
 
-const mnumonic_hexcode = {
+const mnemonic_hexcode = {
     "NOP"   :0x00, "LXI_B" :0x01, "STAX_B":0x02, "INX_B" :0x03,
     "INR_B" :0x04, "DCR_B" :0x05, "MVI_B" :0x06, "RLC":0x07,
     "DAD_B" :0x09, "LDAX_B":0x0A, "DCX_B" :0x0B, "INR_C" :0x0C,
@@ -195,16 +195,32 @@ class Tokenizer {
 }
 
 const is_Mnumonic_Str = (str) => {
-    if(mnumonic_hm.get(str.toUpperCase()) === 1) {
+    if(mnemonic_hm.get(str.toUpperCase()) > 0) {
         return true;
     }
     return false;
 };
 
-const is_Reg_Str = (ch) => {
+const is_Reg_Str = (str) => {
+    let regs = ["A", "B", "C", "D", "E", "H", "L", "M", "SP", "PSW"];
+    for(let r of regs) {
+        if(r === str.toUpperCase()) return true;
+    }
+    return false;
+};
+
+const is_Reg8_Str = (str) => {
     let regs = ["A", "B", "C", "D", "E", "H", "L", "M"];
     for(let r of regs) {
-        if(r === ch.toUpperCase()) return true;
+        if(r === str.toUpperCase()) return true;
+    }
+    return false;
+};
+
+const is_Reg16_Str = (str) => {
+    let regs = ["B", "D", "H", "SP"];
+    for(let r of regs) {
+        if(r === str.toUpperCase()) return true;
     }
     return false;
 };
@@ -222,10 +238,34 @@ const DIRECTIVE_ORG = iota++;
 const DIRECTIVE_DB  = iota++;
 
 class Token {
-    constructor(t_type, t_data) {
-        this.token_type = t_type;
-        this.token_data = t_data;
+    constructor(t_type, t_data, t_row, t_col) {
+        this.t_type = t_type;
+        this.t_data = t_data;
+        this.t_row = t_row;
+        this.t_col = t_col;
     }
+}
+
+class Token_Marcher {
+    constructor(token_array) {
+        this.tokens = token_array;
+        this.t_idx = 0;
+    }
+    
+    peek_Next() {
+        if(this.t_idx < this.tokens.length) {
+            return this.tokens[this.t_idx];
+        } else {
+            return null;
+        }
+    }
+    
+    consume_Next() {
+        if(this.t_idx <= this.tokens.length) {
+            this.t_idx++;
+        }
+    }
+
 }
 
 const tokenize = () => {
@@ -243,31 +283,31 @@ const tokenize = () => {
         if(token.charAt(0) === '.') { // directive
             token = token.toUpperCase();
             if(token === ".ORG") {
-                tokens.push(new Token(TOKEN_DIRECTIVE, DIRECTIVE_ORG));
+                tokens.push(new Token(TOKEN_DIRECTIVE, DIRECTIVE_ORG, tk_info.row, tk_info.col));
             } else if(token === ".DB") {
-                tokens.push(new Token(TOKEN_DIRECTIVE, DIRECTIVE_DB));
+                tokens.push(new Token(TOKEN_DIRECTIVE, DIRECTIVE_DB, tk_info.row, tk_info.col));
             } else {
                 alert("Invalid Directive at row: " + tk_info.row + " col: " + tk_info.col);
                 return null;
             }
         } 
         else if(token.charAt(token.length - 1) === ":") {
-            tokens.push(new Token(TOKEN_LABEL_DEF, token.slice(0, token.length - 1)));
+            tokens.push(new Token(TOKEN_LABEL_DEF, token.slice(0, token.length - 1), tk_info.row, tk_info.col));
         } 
         else if(is_Hex_Str(token) && token.length > 1) {
-            tokens.push(new Token(TOKEN_NUMBER, parseInt(token.slice(0, token.length - 1), 16)));
+            tokens.push(new Token(TOKEN_NUMBER, parseInt(token.slice(0, token.length - 1), 16), tk_info.row, tk_info.col));
         }
         else if(is_Reg_Str(token)) {
-            tokens.push(new Token(TOKEN_REGISTER, token.toUpperCase()));
+            tokens.push(new Token(TOKEN_REGISTER, token.toUpperCase(), tk_info.row, tk_info.col));
         }
         else if(is_Mnumonic_Str(token)) {
-            tokens.push(new Token(TOKEN_MNEMONIC, token.toUpperCase()));
+            tokens.push(new Token(TOKEN_MNEMONIC, token.toUpperCase(), tk_info.row, tk_info.col));
         }
         else if(token === ',') {
-            tokens.push(new Token(TOKEN_COMMA, null));
+            tokens.push(new Token(TOKEN_COMMA, null, tk_info.row, tk_info.col));
         }
         else if(is_Alphabet(token.charAt(0))) { // LABEL CHECK
-            tokens.push(new Token(TOKEN_LABEL_USE, token));
+            tokens.push(new Token(TOKEN_LABEL_USE, token, tk_info.row, tk_info.col));
         } 
         else {
             alert("Invalid Token at row: " + tk_info.row + " col: " + tk_info.col);
@@ -277,8 +317,416 @@ const tokenize = () => {
     return tokens;
 }
 
+const is_Number_u8 = (num) => {
+    if(num > 0xFF || num < 0) return false;
+    return true;
+}
+
+const is_Number_u16 = (num) => {
+    if(num > 0xFFFF || num < 0) return false;
+    return true;
+}
+
 const lexical_analysis = () => {
-    
+    let joined_tokens = [];
+    let tokens = tokenize(); 
+    if(tokens === null) {
+        return null;
+    }
+    let tm = new Token_Marcher(tokens);
+    while(true) {
+        let token = tm.peek_Next();
+        if(token === null) {
+            break;
+        }
+        tm.consume_Next();
+        switch(token.t_type) {
+            case TOKEN_LABEL_DEF: {
+                // these can just exist, no problems
+                joined_tokens.push(token);
+                break;
+            }
+            case TOKEN_DIRECTIVE: {
+                if(token.t_data === DIRECTIVE_ORG) {
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_NUMBER) {
+                        alert("Invalid Syntax at line : " + token.t_row);
+                        return null;
+                    }
+                    if(!is_Number_u16(next.t_data)) { 
+                        console.log(next);
+                        alert("At line " + token.t_row + " : .org operand must must be a 16-bit number");
+                        return null;
+                    }
+                    joined_tokens.push(token);
+                    joined_tokens.push(next);
+                } 
+                else if(token.t_data === DIRECTIVE_DB) {
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_NUMBER) {
+                        alert("Invalid Syntax at line : " + token.t_row);
+                        return null;
+                    }
+                    if(!is_Number_u8(next.t_data)) {
+                        alert("At line " + token.t_row + " : .db operand must must be 8-bit number(s)");
+                        return null;
+                    }
+                    joined_tokens.push(token);
+                    joined_tokens.push(next);
+                    if(tm.peek_Next() === null) {
+                        break;
+                    }
+                    while(tm.peek_Next().t_type === TOKEN_NUMBER) {
+                        if(!is_Number_u8(tm.peek_Next().t_data)) {
+                            alert("At line " + token.t_row + " : .db operand must must be 8-bit number(s)");
+                            return null;
+                        }
+                        joined_tokens.push(tm.peek_Next());
+                        tm.consume_Next();
+                        if(tm.peek_Next() === null) {
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+            case TOKEN_MNEMONIC: {
+            //    ..."NOP",..."LXI",..."STAX",..."INX",..."INR",..."DCR",..."MVI",..."RLC",..."DAD",
+            //    ..."LDAX",..."DCX",..."RRC",..."RAL",..."RAR",..."RIM",..."SHLD",..."DAA",..."LHLD",
+            //    ..."CMA",..."SIM",..."STA",..."STC",..."LDA",..."CMC",..."MOV",..."HLT",..."ADD",
+            //    ..."ADC",..."SUB",..."SBB",..."ANA",..."XRA",..."ORA",..."CMP",..."RNZ",..."POP",
+            //    ..."JNZ",..."JMP",..."CNZ",..."PUSH",..."ADI",..."RZ",..."RET",..."JZ",..."CZ",..."CALL",
+            //    ..."ACI",..."RNC",..."JNC",..."OUT",..."CNC",..."SUI",..."RC",..."JC",..."IN",
+            //    ..."CC",..."SBI",..."RPO",..."JPO",..."XTHL",..."CPO",..."ANI",..."RPE",..."PCHL",
+            //    ..."JPE",..."XCHG",..."CPE",..."XRI",..."RP",..."JP",..."DI",..."CP",..."ORI",
+            //    ..."RM",..."SPHL",..."JM",..."EI",..."CM",..."CPI",..."RST"
+                if(token.t_data === "NOP"  || token.t_data === "HLT"  || token.t_data === "DAA" || 
+                   token.t_data === "RRC"  || token.t_data === "RAL"  || token.t_data === "RAR" || 
+                   token.t_data === "CMC"  || token.t_data === "RNZ"  || token.t_data === "RZ"  ||
+                   token.t_data === "RET"  || token.t_data === "RNC"  || token.t_data === "RC"  ||
+                   token.t_data === "OUT"  || token.t_data === "IN"   || token.t_data === "RIM" || 
+                   token.t_data === "SIM"  || token.t_data === "RPO"  || token.t_data === "RPE" || 
+                   token.t_data === "XTHL" || token.t_data === "DI"   || token.t_data === "RP"  ||
+                   token.t_data === "RM"   || token.t_data === "SPHL" || token.t_data === "EI"  ||
+                   token.t_data === "RLC"  || token.t_data === "CMA"  || token.t_data === "STC" || 
+                   token.t_data === "RST"  || token.t_data === "PCHL" || token.t_data === "XCHG") 
+                {
+                    if(token.t_data === "RIM" || token.t_data === "SIM" || 
+                       token.t_data === "IN"  || token.t_data === "OUT" ||
+                       token.t_data === "DI"  || token.t_data === "EI") 
+                    {
+                        alert("Instruction " + token.t_data + " is not supported at : " + token.t_row);
+                        return null;
+                    }
+                    joined_tokens.push(token);
+                }
+                else if(token.t_data === "ADI" || token.t_data === "SUI" || token.t_data === "ACI" || token.t_data === "SBI" ||
+                        token.t_data === "ANI" || token.t_data === "XRI" || token.t_data === "ORI" || token.t_data === "CPI")
+                {
+                    // 8-bit number check
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_NUMBER) {
+                        alert("Invalid Syntax at line : " + token.t_row);
+                        return null;
+                    }
+                    if(!is_Number_u8(next.t_data)) {
+                        alert("At line " + token.t_row + " : Operand must be 8-bit number");
+                        return null;
+                    }
+                    joined_tokens.push(token);
+                    joined_tokens.push(next);
+                }
+                else if(token.t_data === "POP" || token.t_data === "PUSH") {
+                    // checking for B, D, H, PSW
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(next.t_data !== "B" && next.t_data !== "D" && next.t_data !== "H" && next.t_data !== "PSW") {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+                }
+                else if(token.t_data === "ADD" || token.t_data === "ADC" || token.t_data === "SUB" || token.t_data === "SBB" ||
+                        token.t_data === "ANA" || token.t_data === "XRA" || token.t_data === "ORA" || token.t_data === "CMP") 
+                {
+                    // check for valid Register
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg8_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+                }
+                else if(token.t_data === "MOV") {
+                    // check for valid Register
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg8_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let str = next.t_data;
+
+                    // comma check
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_COMMA) {
+                        alert("At line " + token.t_row + " : ',' expected");
+                        return null;
+                    }
+
+                    // check for valid Register
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg8_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    str += ("_" + next.t_data);
+
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + str, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+                }
+                else if(token.t_data === "SHLD" || token.t_data === "LHLD" || token.t_data === "STA" || token.t_data === "LDA" ||
+                        token.t_data === "JNZ"  || token.t_data === "JMP"  || token.t_data === "CNZ" || token.t_data === "JZ"  ||
+                        token.t_data === "CZ"   || token.t_data === "CALL" || token.t_data === "JNC" || token.t_data === "CNC" ||
+                        token.t_data === "JC"   || token.t_data === "CC"   || token.t_data === "JPO" || token.t_data === "CPO" ||
+                        token.t_data === "JPE"  || token.t_data === "CPE"  || token.t_data === "JP"  || token.t_data === "CP"  ||
+                        token.t_data === "JM"  || token.t_data === "CM")
+                {
+                    // checking for valid u16 hex number or label
+                    joined_tokens.push(token);
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type === TOKEN_NUMBER && is_Number_u16(next.t_data)) {
+                        joined_tokens.push(next);
+                    } else if(next.t_type === TOKEN_LABEL_USE) {
+                        joined_tokens.push(next);
+                    } else {
+                        alert("At line " + token.t_row + " : Operand must be a 16-bit number or a label");
+                        return null;
+                    }
+                }
+                else if(token.t_data === "MVI") {
+                    // check for valid Register
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg8_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+
+                    // comma check
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_COMMA) {
+                        alert("At line " + token.t_row + " : ',' expected");
+                        return null;
+                    }
+
+                    // 8-bit number check
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_NUMBER) {
+                        alert("Invalid Syntax at line : " + token.t_row);
+                        return null;
+                    }
+                    if(!is_Number_u8(next.t_data)) {
+                        alert("At line " + token.t_row + " : Operand must be 8-bit number");
+                        return null;
+                    }
+                    joined_tokens.push(next);
+                }
+                else if(token.t_data === "INR" || token.t_data === "DCR") {
+                    // check for valid Register
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg8_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+                }
+                else if(token.t_data === "INX" || token.t_data === "DAD" || token.t_data === "DCX") {
+                    // check for valid Register Pair
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg16_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+                }
+                else if(token.t_data === "STAX" || token.t_data === "LDAX") {
+                    // check for valid Register Pair
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(next.t_data !== "B" && next.t_data !== "D") {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+                }
+                else if(token.t_data === "LXI") {
+                    // checking for valid Register Pair
+                    let next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_REGISTER) {
+                        alert("At line " + token.t_row + " : Register Not Defined");
+                        return null;
+                    }
+                    if(!is_Reg16_Str(next.t_data)) {
+                        alert("At line " + token.t_row + " : Invalid Register");
+                        return null;
+                    }
+                    let new_token = new Token(TOKEN_MNEMONIC, token.t_data + "_" + next.t_data, token.t_row, token.t_col);
+                    joined_tokens.push(new_token);
+
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_COMMA) {
+                        alert("At line " + token.t_row + " : ',' expected");
+                        return null;
+                    }
+
+                    // checking for valid u16 hex number or label
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type === TOKEN_NUMBER && is_Number_u16(next.t_data)) {
+                        joined_tokens.push(next);
+                    } else if(next.t_type === TOKEN_LABEL_USE) {
+                        joined_tokens.push(next);
+                    } else {
+                        alert("At line " + token.t_row + " : Operand must be a 16-bit number or a label");
+                        return null;
+                    }
+                } else {
+                    alert("Invalid Mnemonic("+ token.t_data +") at line : " + token.t_row);
+                }
+                break;
+            }
+            default: {
+                alert("Lexical Error: Invalid Syntax at line : " + token.t_row);
+                return null;
+            }
+        }
+    }
+    return joined_tokens;
 }
 
 
