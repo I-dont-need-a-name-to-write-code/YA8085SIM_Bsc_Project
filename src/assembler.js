@@ -12,9 +12,33 @@ let mnemonic_type = [
 ];
 
 let mnemonic_hm = new Map();
-for(let mem of mnemonic_type) {
-    mnemonic_hm.set(mem, 1);
-}
+mnemonic_hm.set("NOP",  1); mnemonic_hm.set("LXI",  3); mnemonic_hm.set("STAX", 1);
+mnemonic_hm.set("INX",  1); mnemonic_hm.set("INR",  1); mnemonic_hm.set("DCR",  1);
+mnemonic_hm.set("MVI",  2); mnemonic_hm.set("RLC",  1); mnemonic_hm.set("DAD",  1);
+mnemonic_hm.set("LDAX", 1); mnemonic_hm.set("DCX",  1); mnemonic_hm.set("RRC",  1);
+mnemonic_hm.set("RAL",  1); mnemonic_hm.set("RAR",  1); mnemonic_hm.set("RIM",  1);
+mnemonic_hm.set("SHLD", 3); mnemonic_hm.set("DAA",  1); mnemonic_hm.set("LHLD", 3);
+mnemonic_hm.set("LHLD", 3); mnemonic_hm.set("CMA",  1); mnemonic_hm.set("SIM",  1); 
+mnemonic_hm.set("STA",  3); mnemonic_hm.set("STC",  1); mnemonic_hm.set("LDA",  3);
+mnemonic_hm.set("CMC",  1); mnemonic_hm.set("MOV",  1); mnemonic_hm.set("HLT",  1);
+mnemonic_hm.set("ADD",  1); mnemonic_hm.set("ADC",  1); mnemonic_hm.set("SUB",  1);
+mnemonic_hm.set("SBB",  1); mnemonic_hm.set("ANA",  1); mnemonic_hm.set("XRA",  1);
+mnemonic_hm.set("ORA",  1); mnemonic_hm.set("CMP",  1); mnemonic_hm.set("RNZ",  1);
+mnemonic_hm.set("POP",  1); mnemonic_hm.set("JNZ",  3); mnemonic_hm.set("JMP",  3);
+mnemonic_hm.set("CNZ",  3); mnemonic_hm.set("PUSH", 1); mnemonic_hm.set("ADI",  2);
+mnemonic_hm.set("ADI",  2); mnemonic_hm.set("RZ",   1); mnemonic_hm.set("RET",  1);
+mnemonic_hm.set("JZ",   3); mnemonic_hm.set("CZ",   3); mnemonic_hm.set("CALL", 3);
+mnemonic_hm.set("ACI",  2); mnemonic_hm.set("RNC",  1); mnemonic_hm.set("JNC",  3);
+mnemonic_hm.set("OUT",  2); mnemonic_hm.set("CNC",  3); mnemonic_hm.set("SUI",  2);
+mnemonic_hm.set("RC",   1); mnemonic_hm.set("JC",   3); mnemonic_hm.set("IN",   2);
+mnemonic_hm.set("CC",   3); mnemonic_hm.set("SBI",  2); mnemonic_hm.set("RPO",  1);
+mnemonic_hm.set("JPO",  3); mnemonic_hm.set("XTHL", 1); mnemonic_hm.set("CPO",  3);
+mnemonic_hm.set("ANI",  2); mnemonic_hm.set("RPE",  1); mnemonic_hm.set("PCHL", 1);
+mnemonic_hm.set("JPE",  3); mnemonic_hm.set("XCHG", 1); mnemonic_hm.set("CPE",  3);
+mnemonic_hm.set("RP",   1); mnemonic_hm.set("JP",   3); mnemonic_hm.set("DI",   1);
+mnemonic_hm.set("CP",   3); mnemonic_hm.set("ORI",  2); mnemonic_hm.set("RM",   1);
+mnemonic_hm.set("SPHL", 1); mnemonic_hm.set("JM",   3); mnemonic_hm.set("EI",   1);
+mnemonic_hm.set("CM",   3); mnemonic_hm.set("CPI",  2); mnemonic_hm.set("RST",  1);
 
 const mnemonic_hexcode = {
     "NOP"   :0x00, "LXI_B" :0x01, "STAX_B":0x02, "INX_B" :0x03,
@@ -194,7 +218,7 @@ class Tokenizer {
 
 }
 
-const is_Mnumonic_Str = (str) => {
+const is_Mnemonic_Str = (str) => {
     if(mnemonic_hm.get(str.toUpperCase()) > 0) {
         return true;
     }
@@ -265,7 +289,6 @@ class Token_Marcher {
             this.t_idx++;
         }
     }
-
 }
 
 const tokenize = () => {
@@ -300,7 +323,7 @@ const tokenize = () => {
         else if(is_Reg_Str(token)) {
             tokens.push(new Token(TOKEN_REGISTER, token.toUpperCase(), tk_info.row, tk_info.col));
         }
-        else if(is_Mnumonic_Str(token)) {
+        else if(is_Mnemonic_Str(token)) {
             tokens.push(new Token(TOKEN_MNEMONIC, token.toUpperCase(), tk_info.row, tk_info.col));
         }
         else if(token === ',') {
@@ -419,7 +442,7 @@ const lexical_analysis = () => {
                    token.t_data === "XTHL" || token.t_data === "DI"   || token.t_data === "RP"  ||
                    token.t_data === "RM"   || token.t_data === "SPHL" || token.t_data === "EI"  ||
                    token.t_data === "RLC"  || token.t_data === "CMA"  || token.t_data === "STC" || 
-                   token.t_data === "RST"  || token.t_data === "PCHL" || token.t_data === "XCHG") 
+                   token.t_data === "PCHL" || token.t_data === "XCHG") 
                 {
                     if(token.t_data === "RIM" || token.t_data === "SIM" || 
                        token.t_data === "IN"  || token.t_data === "OUT" ||
@@ -429,6 +452,25 @@ const lexical_analysis = () => {
                         return null;
                     }
                     joined_tokens.push(token);
+                }
+                else if(token.t_data === "RST") {
+                    // 8-bit number check
+                    next = tm.peek_Next();
+                    if(next === null) {
+                        alert("Unexpected End of Code at : " + token.t_row);
+                        return null;
+                    }
+                    tm.consume_Next();
+                    if(next.t_type !== TOKEN_NUMBER) {
+                        alert("Invalid Syntax at line : " + token.t_row);
+                        return null;
+                    }
+                    if(next.t_data >= 0 && next.t_data <= 7) {
+                        alert("At line " + token.t_row + " : Operand must be between 0-7");
+                        return null;
+                    }
+                    joined_tokens.push(token);
+                    joined_tokens.push(next);
                 }
                 else if(token.t_data === "ADI" || token.t_data === "SUI" || token.t_data === "ACI" || token.t_data === "SBI" ||
                         token.t_data === "ANI" || token.t_data === "XRI" || token.t_data === "ORI" || token.t_data === "CPI")
@@ -729,4 +771,140 @@ const lexical_analysis = () => {
     return joined_tokens;
 }
 
+
+
+const generate_machine_code = () => {
+    let addr = new Uint16Array(1);
+    addr[0] = 0x0000;
+    let mc = [];
+    let joined_tokens = lexical_analysis();
+    if(joined_tokens === null) {
+        alert("Lexical Analysis Failed");
+        return null;
+    }
+    let label_hm = new Map();
+    let label_req_hm = new Map();
+    let tm = new Token_Marcher(joined_tokens);
+    while(tm.peek_Next() !== null) {
+        let token = tm.peek_Next();
+        tm.consume_Next();
+        switch(token.t_type) {
+            case TOKEN_DIRECTIVE: {
+                if(token.t_data === DIRECTIVE_ORG) {
+                    addr[0] = tm.peek_Next().t_data;
+                    tm.consume_Next();
+                }
+                else if(token.t_data === DIRECTIVE_DB) {
+                    while(true) {
+                        let next = tm.peek_Next();
+                        if(next === null) break;
+                        if(next.t_type !== TOKEN_NUMBER) break;
+                        tm.consume_Next();
+                        mc.push( { addr: addr[0], data: next.t_data } );
+                        addr[0]++;
+                    }
+                }
+                else {
+                    alert("Unreachable Code : Major Error Ocurred !!!");
+                    return null;
+                }
+                break;
+            } 
+            case TOKEN_LABEL_DEF: {
+                if(label_hm.get(token.t_data) !== undefined) {
+                    alert("Error: Label '" + token.t_data + "' was defined multiple times.");
+                    return null;
+                }
+                let fill_reqs = label_req_hm.get(token.t_data);
+                if(fill_reqs !== undefined) {
+                    let n16 = addr[0]; 
+                    let n16_lower = n16 & 0xFF;
+                    let n16_upper = (n16 >> 8) & 0xFF;
+                    for(let f_req_idx of fill_reqs) {
+                        mc[f_req_idx]     = { addr: mc[f_req_idx].addr, data: n16_lower };
+                        mc[f_req_idx + 1] = { addr: mc[f_req_idx + 1].addr, data: n16_upper };
+                    }
+                }
+                label_hm.set(token.t_data, addr[0]);
+                break;
+            }
+            case TOKEN_MNEMONIC: {
+                let machine_code = mnemonic_hexcode[token.t_data];
+                mc.push( { addr: addr[0], data: machine_code } );
+                addr[0]++;
+                let mnemonic = token.t_data.split("_")[0];
+                let n_bytes = mnemonic_hm.get(mnemonic);
+                if(n_bytes === null) {
+                    alert("Major Error: n_bytes(null) at (assembler.js/812).");
+                    return null;
+                }
+                if(n_bytes === 1) {} 
+                else if(n_bytes === 2) {
+                    let token_u8 = tm.peek_Next().t_data;
+                    tm.consume_Next();
+                    mc.push( { addr: addr[0], data: token_u8 } );
+                    addr[0]++;
+                }
+                else if(n_bytes === 3) {
+                    let next = tm.peek_Next();
+                    tm.consume_Next();
+                    let n16 = 0x0000; 
+                    if(next.t_type === TOKEN_NUMBER) {
+                        n16 = next.t_data;
+                    } 
+                    else if(next.t_type === TOKEN_LABEL_USE) {
+                        n16 = label_hm.get(next.t_data);
+                        if(n16 === undefined) { // map does not have label
+                            // create label fillup request
+                            let label_reqs = label_req_hm.get(next.t_data);
+                            if(label_reqs === undefined) {
+                                label_req_hm.set(next.t_data, [ mc.length ]); 
+                            } else {
+                                label_req_hm.set(next.t_data, label_reqs.push(mc.length)); 
+                            }
+                        }
+                    }
+                    
+                    let n16_lower = n16 & 0xFF;
+                    mc.push( { addr: addr[0], data: n16_lower } );
+                    addr[0]++;
+
+                    let n16_upper = (n16 >> 8) & 0xFF;
+                    mc.push( { addr: addr[0], data: n16_upper } );
+                    addr[0]++;
+                }
+                break;
+            }
+            default: {
+                alert("Code_Generation Error");
+                return null;
+            }
+        }
+    }
+    for(let use_label of label_req_hm) {
+        if(label_hm.get(use_label[0]) === undefined) {
+            alert("Error: label '" + use_label[0] + "' used but never defined.");
+            return null;
+        }
+    }
+    if(label_hm.get("_start") === undefined) {
+            alert("Error : '_start' symbol was never defined.");
+            return null;
+    }
+    return [label_hm.get("_start") , mc];
+};
+
+
+const run_program = () => {
+    let code = generate_machine_code(); // [0] = start_addr | [1] = bytes(mc) array
+    if(code === null) {
+        alert("Machine Code Generation Failed");
+        return null;
+    }
+    global.cpu_ctx.reset();
+    for(let byte of code[1]) {
+        global.cpu_ctx.set_Mem(byte.addr, byte.data);
+    }
+    execute_program(global.cpu_ctx, code[0]);
+};
 
