@@ -1,73 +1,4 @@
 
-let iota = 0;
-
-// REGISTER INDEXES
-const REG_A   = 0;
-const REG_B   = 1;
-const REG_C   = 2;
-const REG_D   = 3;
-const REG_E   = 4;
-const REG_H   = 5;
-const REG_L   = 6;
-const REG_SPH = 7;
-const REG_SPL = 8;
-const REG_SP  = REG_SPH;
-const REG_PCH = 9;
-const REG_PCL = 10;
-const REG_PC  = REG_PCH;
-
-// FLAG INDEXES
-const FLAG_S  = 0;
-const FLAG_Z  = 1;
-const FLAG_AC = 2;
-const FLAG_P  = 3;
-const FLAG_CY = 4;
-
-// FLAG MASKS
-const FLAG_S_MASK  = (1 << 7);
-const FLAG_Z_MASK  = (1 << 6);
-const FLAG_AC_MASK = (1 << 4);
-const FLAG_P_MASK  = (1 << 2);
-const FLAG_CY_MASK = (1 << 0);
-
-// REGISTER CODES
-const REG_A_CODE = 0b111;
-const REG_B_CODE = 0b000;
-const REG_C_CODE = 0b001;
-const REG_D_CODE = 0b010;
-const REG_M_CODE = 0b110;
-const REG_E_CODE = 0b011;
-const REG_H_CODE = 0b100;
-const REG_L_CODE = 0b101;
-
-const RP_BC_CODE = 0b00;
-const RP_DE_CODE = 0b01;
-const RP_HL_CODE = 0b10;
-const RP_SP_CODE = 0b11;
-
-const REG_CODE_TO_IDX = [
-    REG_B, REG_C, REG_D, REG_E, REG_H, REG_L, 0b000, REG_A
-];
-
-const REG_IDX_TO_CODE = [
-    REG_A_CODE, REG_B_CODE, REG_C_CODE, REG_D_CODE,
-    REG_E_CODE, REG_H_CODE, REG_L_CODE
-];
-
-const RP_CODE_TO_IDX = [
-    REG_B, REG_D, REG_H, REG_SP
-];
-
-// ENUMS
-const INSTR_TY_ADD = iota++;
-const INSTR_TY_SUB = iota++;
-
-const MSG_TY_DFLT = iota++;
-const MSG_TY_EXEC = iota++;
-
-// CONSTANTS
-const MEMORY_SIZE = 65536;
-
 const make_Word = (byte_h, byte_l) => {
     return ((byte_h << 8) | byte_l);
 };
@@ -1268,17 +1199,6 @@ const handle_instruction = (cpu, instr) => {
         default: { 
             return false; 
         }
-    }
-    return true;
-};
-
-// make sure that the PC is set accordingly before calling this function.
-const execute_next_instruction = (cpu) => {
-    let instr = cpu.fetch_Byte();
-    if(instr === INSTR_HLT) return false;
-    if(!handle_instruction(cpu, instr)) {
-        console.log("[ERROR] Invalid Instruction -> " + to_Hex2_Str(instr));
-        return false;
     }
     return true;
 };

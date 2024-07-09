@@ -2,12 +2,69 @@
     <head>
         <title>YA8085SIM</title>
         <link rel="stylesheet" href="./style.css"/>
+        <link rel="stylesheet" href="./codemirror/lib/codemirror.css"/>
+        <link rel="stylesheet" href="./codemirror/theme/dracula.css"/>
     </head>
-    <body bgColor="#181818">
-        <textarea id="code_area"></textarea>
-        <script language="javascript" type="text/javascript" src="./hexcodes.js"></script>
-        <script language="javascript" type="text/javascript" src="./sim8085.js"></script>
-        <script language="javascript" type="text/javascript" src="./assembler.js"></script>
-        <script language="javascript" type="text/javascript" src="./main.js"></script>
+    <body>
+        <div class="all_windows">
+            <div class="register_window">
+                <div>
+                    <label for="regA">A</label>
+                    <input id="regA" type="text" value="" style="margin-left:40px" readonly>H
+                </div>
+                <div>
+                    <label for="regF">Flag</label>
+                    <input id="regF" type="text" value="" style="margin-left:20px;" readonly>H
+                </div>
+                
+                <div>
+                    <label for="regB">B</label>
+                    <input id="regB" type="text" value="" style="margin-left:39px;" readonly>H
+                </div>
+                <div>
+                    <label for="regC">C</label>
+                    <input id="regC" type="text" value="" style="margin-left:38px;" readonly>H
+                </div>
+
+                <div>
+                    <label for="regD">D</label>
+                    <input id="regD" type="text" value="" style="margin-left:38px;" readonly>H
+                </div>
+                <div>
+                    <label for="regE">E</label>
+                    <input id="regE" type="text" value="" style="margin-left:39px;" readonly>H
+                </div>
+
+                <div>
+                    <label for="regH">H</label>
+                    <input id="regH" type="text" value="" style="margin-left:38px;" readonly>H
+                </div>
+                <div>
+                    <label for="regL">L</label>
+                    <input id="regL" type="text" value="" style="margin-left:41px" readonly>H
+                </div>
+            </div>
+            <div class="editor_and_bar">
+                <div class="bar">
+                    <button class="compile_button" role="button">Compile</button>
+                </div>
+                <div class="editor_window">
+                    <textarea id="code_area"></textarea>
+                </div>
+            </div>
+            <div class="memory_window">
+            </div>
+        </div>
+        <div class="scripts">
+            <script language="javascript" type="text/javascript" src="./codemirror/lib/codemirror.js"></script>
+            <script language="javascript" type="text/javascript" src="./codemirror/mode/assembly/assembly.js"></script>
+            <script language="javascript" type="text/javascript" src="./enums_and_consts.js"></script>
+            <script language="javascript" type="text/javascript" src="./sim8085.js"></script>
+            <script language="javascript" type="text/javascript" src="./assembler.js"></script>
+            <script language="javascript" type="text/javascript" src="./global.js"></script>
+            <script language="javascript" type="text/javascript" src="./execution.js"></script>
+            <script language="javascript" type="text/javascript" src="./ui.js"></script>
+            <script language="javascript" type="text/javascript" src="./main.js"></script>
+        </div>
     </body>
 </html>

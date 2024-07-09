@@ -1,11 +1,4 @@
 
-let global = {
-    cpu_ctx: new CPU_Context(),
-    runner_worker_handle: new Worker("runner_worker.js"),
-    is_running: false,
-    is_paused: false,
-};
-
 global.runner_worker_handle.onmessage = (msg_from_runner) => {
     let msg_data = JSON.parse(msg_from_runner.data);
     copy_CPU_Context(global.cpu_ctx, msg_data);
@@ -13,32 +6,28 @@ global.runner_worker_handle.onmessage = (msg_from_runner) => {
     global.is_running = false;
 };
 
-const execute_program = (cpu, prog_addr) => {
-    if(global.is_running) return false;
-    cpu.reset();
-    cpu.set_PC(prog_addr);
-    global.is_running = true;
-    global.runner_worker_handle.postMessage(JSON.stringify(cpu));
-    return true;
-}; 
-
-function enable_Tab(id) {
-    var el = document.getElementById(id);
-    el.onkeydown = function(e) {
-        if (e.keyCode === 9) { // tab was pressed
-            // get caret position/selection
-            var val = this.value,
-                start = this.selectionStart,
-                end = this.selectionEnd;
-            // set textarea value to: text before caret + tab + text after caret
-            this.value = val.substring(0, start) + '\t' + val.substring(end);
-            // put caret at right position again
-            this.selectionStart = this.selectionEnd = start + 1;
-            // prevent the focus lose
-            return false;
-        }
-    };
+const compile = () => {
+    let code_str = editor.getValue();
+    let code = generate_machine_code(code_str); // [0] = start_addr | [1] = bytes(mc) array
+    if(code === null) {
+        alert("Machine Code Generation Failed");
+        return null;
+    }
+    global.cpu_ctx.reset();
+    for(let byte of code[1]) {
+        global.cpu_ctx.set_Mem(byte.addr, byte.data);
+    }
+    global.is_compiled = true;
+    alert("Machine Code Has Been Generated\n_start -> " + to_Hex2_Str(code[0]));
 }
 
-enable_Tab('code_area');
+document.getElementsByClassName("compile_button")[0].addEventListener("click", (event) => {
+    compile();
+    update_register_window();
+});
 
+editor.on('change', (event) => {
+    global.is_compiled = false;
+});
+
+update_register_window();

@@ -149,8 +149,8 @@ class Tokenizer {
     constructor(text_str) {
         this.text_str = text_str + "\n";
         this.idx = 0;
-        this.lines = 0;  // row
-        this.offset = 0; // col
+        this.lines  = 1; // row
+        this.offset = 1; // col
     }
 
     peek_Next_Char() {
@@ -249,18 +249,6 @@ const is_Reg16_Str = (str) => {
     return false;
 };
 
-const TOKEN_NONE      = iota++;
-const TOKEN_MNEMONIC  = iota++;
-const TOKEN_NUMBER    = iota++;
-const TOKEN_REGISTER  = iota++;
-const TOKEN_LABEL_DEF = iota++;
-const TOKEN_LABEL_USE = iota++;
-const TOKEN_DIRECTIVE = iota++;
-const TOKEN_COMMA     = iota++;
-
-const DIRECTIVE_ORG = iota++;
-const DIRECTIVE_DB  = iota++;
-
 class Token {
     constructor(t_type, t_data, t_row, t_col) {
         this.t_type = t_type;
@@ -291,8 +279,8 @@ class Token_Marcher {
     }
 }
 
-const tokenize = () => {
-    let tk = new Tokenizer(document.getElementById("code_area").value);
+const tokenize = (code_str) => {
+    let tk = new Tokenizer(code_str);
     let tokens = [];
     while(true) {
         let tk_info = tk.next_Token();
@@ -310,7 +298,7 @@ const tokenize = () => {
             } else if(token === ".DB") {
                 tokens.push(new Token(TOKEN_DIRECTIVE, DIRECTIVE_DB, tk_info.row, tk_info.col));
             } else {
-                alert("Invalid Directive at row: " + tk_info.row + " col: " + tk_info.col);
+                alert("Invalid Directive at line: " + tk_info.row + " column: " + tk_info.col);
                 return null;
             }
         } 
@@ -333,7 +321,7 @@ const tokenize = () => {
             tokens.push(new Token(TOKEN_LABEL_USE, token, tk_info.row, tk_info.col));
         } 
         else {
-            alert("Invalid Token at row: " + tk_info.row + " col: " + tk_info.col);
+            alert("Invalid Token at line: " + tk_info.row + " column: " + tk_info.col);
             return null;
         }
     }
@@ -350,9 +338,9 @@ const is_Number_u16 = (num) => {
     return true;
 }
 
-const lexical_analysis = () => {
+const lexical_analysis = (code_str) => {
     let joined_tokens = [];
-    let tokens = tokenize(); 
+    let tokens = tokenize(code_str); 
     if(tokens === null) {
         return null;
     }
@@ -373,7 +361,7 @@ const lexical_analysis = () => {
                 if(token.t_data === DIRECTIVE_ORG) {
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -383,7 +371,7 @@ const lexical_analysis = () => {
                     }
                     if(!is_Number_u16(next.t_data)) { 
                         console.log(next);
-                        alert("At line " + token.t_row + " : .org operand must must be a 16-bit number");
+                        alert("At line " + token.t_row + " : (.org) <operand> must must be a 16-bit number");
                         return null;
                     }
                     joined_tokens.push(token);
@@ -392,7 +380,7 @@ const lexical_analysis = () => {
                 else if(token.t_data === DIRECTIVE_DB) {
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -401,7 +389,7 @@ const lexical_analysis = () => {
                         return null;
                     }
                     if(!is_Number_u8(next.t_data)) {
-                        alert("At line " + token.t_row + " : .db operand must must be 8-bit number(s)");
+                        alert("At line " + token.t_row + " : (.db) <operand> must be 8-bit number(s)");
                         return null;
                     }
                     joined_tokens.push(token);
@@ -411,7 +399,7 @@ const lexical_analysis = () => {
                     }
                     while(tm.peek_Next().t_type === TOKEN_NUMBER) {
                         if(!is_Number_u8(tm.peek_Next().t_data)) {
-                            alert("At line " + token.t_row + " : .db operand must must be 8-bit number(s)");
+                            alert("At line " + token.t_row + " : (.db) <operand> must be 8-bit number(s)");
                             return null;
                         }
                         joined_tokens.push(tm.peek_Next());
@@ -457,7 +445,7 @@ const lexical_analysis = () => {
                     // 8-bit number check
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -478,7 +466,7 @@ const lexical_analysis = () => {
                     // 8-bit number check
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -497,7 +485,7 @@ const lexical_analysis = () => {
                     // checking for B, D, H, PSW
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -518,7 +506,7 @@ const lexical_analysis = () => {
                     // check for valid Register
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -537,7 +525,7 @@ const lexical_analysis = () => {
                     // check for valid Register
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -554,7 +542,7 @@ const lexical_analysis = () => {
                     // comma check
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -566,7 +554,7 @@ const lexical_analysis = () => {
                     // check for valid Register
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -592,9 +580,9 @@ const lexical_analysis = () => {
                 {
                     // checking for valid u16 hex number or label
                     joined_tokens.push(token);
-                    next = tm.peek_Next();
+                    let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -611,7 +599,7 @@ const lexical_analysis = () => {
                     // check for valid Register
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -629,7 +617,7 @@ const lexical_analysis = () => {
                     // comma check
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -641,7 +629,7 @@ const lexical_analysis = () => {
                     // 8-bit number check
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -659,7 +647,7 @@ const lexical_analysis = () => {
                     // check for valid Register
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -678,7 +666,7 @@ const lexical_analysis = () => {
                     // check for valid Register Pair
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -697,7 +685,7 @@ const lexical_analysis = () => {
                     // check for valid Register Pair
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -716,7 +704,7 @@ const lexical_analysis = () => {
                     // checking for valid Register Pair
                     let next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -733,7 +721,7 @@ const lexical_analysis = () => {
 
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -745,7 +733,7 @@ const lexical_analysis = () => {
                     // checking for valid u16 hex number or label
                     next = tm.peek_Next();
                     if(next === null) {
-                        alert("Unexpected End of Code at : " + token.t_row);
+                        alert("Unexpected End of Code");
                         return null;
                     }
                     tm.consume_Next();
@@ -772,12 +760,11 @@ const lexical_analysis = () => {
 }
 
 
-
-const generate_machine_code = () => {
+const generate_machine_code = (code_str) => {
     let addr = new Uint16Array(1);
-    addr[0] = 0x0000;
+    addr[0] = 0x1000;
     let mc = [];
-    let joined_tokens = lexical_analysis();
+    let joined_tokens = lexical_analysis(code_str);
     if(joined_tokens === null) {
         alert("Lexical Analysis Failed");
         return null;
@@ -894,17 +881,4 @@ const generate_machine_code = () => {
     return [label_hm.get("_start") , mc];
 };
 
-
-const run_program = () => {
-    let code = generate_machine_code(); // [0] = start_addr | [1] = bytes(mc) array
-    if(code === null) {
-        alert("Machine Code Generation Failed");
-        return null;
-    }
-    global.cpu_ctx.reset();
-    for(let byte of code[1]) {
-        global.cpu_ctx.set_Mem(byte.addr, byte.data);
-    }
-    execute_program(global.cpu_ctx, code[0]);
-};
 

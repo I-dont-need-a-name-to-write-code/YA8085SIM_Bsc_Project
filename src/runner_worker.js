@@ -1,6 +1,7 @@
 
-importScripts("hexcodes.js"); 
-importScripts("sim8085.js"); 
+importScripts("./enums_and_consts.js");
+importScripts("./sim8085.js");
+importScripts( "./execution.js");
 
 let cpu_ctx = new CPU_Context();
 

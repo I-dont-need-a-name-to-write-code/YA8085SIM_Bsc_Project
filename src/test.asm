@@ -24,22 +24,25 @@ AHEAD: DCR C
 
 -----------------------------------------------------
 
-# array additon
-.org 3000H
-_start:
-	LXI H, array
-	MOV C, M
-	INX H
-	MVI A, 00H
-label1:	ADD M
-	INX H
-	DCR C
-	JNZ label1
-	HLT
 
-.org 4000H
+.org 1000H
 array: 
-.db 04H 10H 20H 40H 80H
+		.db 04H 20H 30H 40H 50H
+
+.org 2000H
+_start:	
+		LXI H, array
+		MOV C, M
+    	INX H
+    	XRA A
+loop:	ADD M
+       	JNC skip
+     	INR D   
+skip:	INX H
+		DCR C
+        JNZ loop
+        MOV E,A
+    	HLT
 
 -----------------------------------------------------
 
