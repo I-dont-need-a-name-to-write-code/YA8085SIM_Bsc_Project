@@ -8,6 +8,7 @@
     <body>
         <div class="all_windows">
             <div class="register_window">
+                <div style="padding-bottom: 10px;"><center><i>Registers</i></center></div>
                 <div>
                     <label for="regA">A</label>
                     <input id="regA" type="text" value="" style="margin-left:40px" readonly>H
@@ -34,7 +35,6 @@
                     <label for="regE">E</label>
                     <input id="regE" type="text" value="" style="margin-left:39px;" readonly>H
                 </div>
-
                 <div>
                     <label for="regH">H</label>
                     <input id="regH" type="text" value="" style="margin-left:38px;" readonly>H
@@ -43,10 +43,33 @@
                     <label for="regL">L</label>
                     <input id="regL" type="text" value="" style="margin-left:41px" readonly>H
                 </div>
+
+                <div style="padding-top: 20px; padding-bottom: 10px;"><center><i>Flags</i></center></div>
+                <div>
+                    <label for="flagS">S</label>
+                    <input id="flagS" type="text" value="" style="margin-left:39px" readonly>
+                </div>
+                <div>
+                    <label for="flagZ">Z</label>
+                    <input id="flagZ" type="text" value="" style="margin-left:40px" readonly>
+                </div>
+                <div>
+                    <label for="flagAC">AC</label>
+                    <input id="flagAC" type="text" value="" style="margin-left:28px" readonly>
+                </div>
+                <div>
+                    <label for="flagP">P</label>
+                    <input id="flagP" type="text" value="" style="margin-left:39px" readonly>
+                </div>
+                <div>
+                    <label for="flagCY">CY</label>
+                    <input id="flagCY" type="text" value="" style="margin-left:28px" readonly>
+                </div>
             </div>
             <div class="editor_and_bar">
                 <div class="bar">
-                    <button class="compile_button" role="button">Compile</button>
+                    <button id="button_compile" class="button_class" role="button">Compile</button>
+                    <button id="button_run" class="button_class" role="button">Run</button>
                 </div>
                 <div class="editor_window">
                     <textarea id="code_area"></textarea>

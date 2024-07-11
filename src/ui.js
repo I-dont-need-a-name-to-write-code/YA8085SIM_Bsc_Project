@@ -17,6 +17,12 @@ const update_register_window = () => {
         let element = document.getElementById(reg_ids[i]);
         element.value = (hex_reg_val.length < 2) ? ('0' + hex_reg_val) : hex_reg_val;
     }
+
+    let flag_ids = ['flagS', 'flagZ', 'flagAC', 'flagP', 'flagCY'];
+    for(let i = 0; i < flag_ids.length; ++i) {
+        let element = document.getElementById(flag_ids[i]);
+        element.value = "0" + ctx.get_Flag(i);
+    }
 };
 
 var editor = CodeMirror.fromTextArea(
@@ -27,5 +33,5 @@ var editor = CodeMirror.fromTextArea(
                 lineNumbers: true,
                 lineWrapping: true
             });
-editor.setSize("550px", "100%");
+editor.setSize("100%", "100%");
 editor.refresh();

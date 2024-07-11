@@ -5,16 +5,23 @@ body {
     color: #F0F0F0;
 }
 
+::-webkit-scrollbar {
+    display: none;
+}
+
 .register_window {
+    width: 13%;
     display: flex;
     flex-direction: column;
     border: 1px solid white;
     margin: 5px;
     padding: 10px;
+    overflow: scroll;
 }
 
 .register_window > div {
-    margin-left: 5px;
+    text-align: center;
+    width: 100%;
 }
 
 .register_window > div > input[type="text"] {
@@ -32,13 +39,8 @@ body {
     margin: 5px;
 }
 
-.all_windows {
-    display: flex; 
-    flex-direction: row;
-    height: 100%;
-}
-
 .editor_and_bar {
+    width: 60%;
     display: flex;
     flex-direction: column;
 }
@@ -48,7 +50,24 @@ body {
     margin: 5px;
 }
 
-.compile_button  {
+.memory_window {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid white;
+    margin: 5px;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.all_windows {
+    width: 100%;
+    height: 100%;
+    display: flex; 
+    flex-direction: row;
+}
+
+.button_class {
+  float: right;
   align-items: center;
   appearance: none;
   background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
@@ -80,16 +99,16 @@ body {
   font-size: 20px;
 }
 
-.compile_button:focus {
+.button_class:focus {
   box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
 }
 
-.compile_button:hover {
+.button_class:hover {
   box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
   transform: translateY(-2px);
 }
 
-.compile_button:active {
+.button_class:active {
   box-shadow: #3c4fe0 0 3px 7px inset;
   transform: translateY(2px);
 }

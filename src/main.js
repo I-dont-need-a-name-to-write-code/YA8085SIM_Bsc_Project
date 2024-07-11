@@ -4,6 +4,8 @@ global.runner_worker_handle.onmessage = (msg_from_runner) => {
     copy_CPU_Context(global.cpu_ctx, msg_data);
     global.cpu_ctx.log();
     global.is_running = false;
+    update_register_window();
+    alert("[Program Executed Successfully]");
 };
 
 const compile = () => {
@@ -21,9 +23,13 @@ const compile = () => {
     alert("Machine Code Has Been Generated\n_start -> " + to_Hex2_Str(code[0]));
 }
 
-document.getElementsByClassName("compile_button")[0].addEventListener("click", (event) => {
+document.getElementById("button_compile").addEventListener("click", (event) => {
     compile();
     update_register_window();
+});
+
+document.getElementById("button_run").addEventListener("click", (event) => {
+    run_program(global.cpu_ctx, editor.getValue());
 });
 
 editor.on('change', (event) => {
