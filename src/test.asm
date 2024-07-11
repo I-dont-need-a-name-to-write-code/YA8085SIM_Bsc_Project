@@ -81,3 +81,29 @@ HERE2:	INX H
 .ORG F000H
 .DB FFH 32H 23H 85H 45H
 
+# factorial
+.org 8000H
+.db	05H
+
+.org 1234H
+_start:
+	LXI H, 8000H
+	MOV B,M
+	MVI D, 01H
+FACT: 
+	CALL MUL
+	DCR B
+	JNZ FACT
+    INX H
+    MOV M,D
+    HLT
+MUL:
+	MOV E,B
+    XRA A
+ML:
+	ADD D
+    DCR E 
+    JNZ ML
+    MOV D,A
+    RET
+
