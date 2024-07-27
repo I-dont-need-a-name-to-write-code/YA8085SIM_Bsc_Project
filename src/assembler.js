@@ -301,10 +301,10 @@ const tokenize = (code_str) => {
                 alert("Invalid Directive at line: " + tk_info.row + " column: " + tk_info.col);
                 return null;
             }
-        } 
+        }
         else if(token.charAt(token.length - 1) === ":") {
             tokens.push(new Token(TOKEN_LABEL_DEF, token.slice(0, token.length - 1), tk_info.row, tk_info.col));
-        } 
+        }
         else if(is_Hex_Str(token) && token.length > 1) {
             tokens.push(new Token(TOKEN_NUMBER, parseInt(token.slice(0, token.length - 1), 16), tk_info.row, tk_info.col));
         }
@@ -338,7 +338,7 @@ const is_Number_u16 = (num) => {
     return true;
 }
 
-const lexical_analysis = (code_str) => {
+const check_instruction_form = (code_str) => {
     let joined_tokens = [];
     let tokens = tokenize(code_str); 
     if(tokens === null) {
@@ -764,7 +764,7 @@ const generate_machine_code = (code_str) => {
     let addr = new Uint16Array(1);
     addr[0] = 0x1000;
     let mc = [];
-    let joined_tokens = lexical_analysis(code_str);
+    let joined_tokens = check_instruction_form(code_str);
     if(joined_tokens === null) {
         alert("Lexical Analysis Failed");
         return null;

@@ -107,3 +107,53 @@ ML:
     MOV D,A
     RET
 
+# 255 * 257
+.ORG F000H
+array:
+
+.ORG 1234H
+result:
+
+.ORG 90FFH
+fill_memory:
+	PUSH D
+    PUSH H
+    MVI D, FFH
+    LXI H, array
+    MVI M, FFH
+    INX H
+	MVI M, FFH
+    INX H
+loop1:
+    MVI M, FFH
+    DCR D
+    INX H
+    JNZ loop1
+    MVI M, 00H
+    POP H
+    POP D
+    RET
+
+.ORG 9000H
+_start:
+	LXI SP, 0000H
+	call fill_memory
+    XRA A
+    MVI B, 00H
+	LXI H, array
+loop:
+	MOV D, M
+    DCR D
+    JC break
+	ADD M
+	JNC skip_carry
+    INR B
+skip_carry:
+	INX H
+    JMP loop
+break:
+    LXI H, result
+    MOV M, A
+    INX H
+    MOV M, B
+    HLT

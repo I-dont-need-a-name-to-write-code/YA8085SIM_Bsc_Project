@@ -8,6 +8,11 @@
     <body>
         <div class="all_windows">
             <div class="register_window">
+                <center><div id="status" style="
+                    width: 100%;
+                    margin-bottom: 10px;
+                    border: 1px solid white;">
+                </div></center>
                 <div style="padding-bottom: 10px;"><center><i>Registers</i></center></div>
                 <div>
                     <label for="regA">A</label>
@@ -68,14 +73,31 @@
             </div>
             <div class="editor_and_bar">
                 <div class="bar">
-                    <button id="button_compile" class="button_class" role="button">Compile</button>
+                    <button id="button_compile" class="button_class" role="button">Assemble</button>
                     <button id="button_run" class="button_class" role="button">Run</button>
+                    <button id="button_terminate" class="button_class" role="button">Reset/Terminate</button>
                 </div>
                 <div class="editor_window">
                     <textarea id="code_area"></textarea>
                 </div>
             </div>
-            <div class="memory_window">
+            <div id="memory_window_id" class="memory_window" style="display: flex;
+            flex-direction: column; border: 1px solid white; overflow: scroll;">
+                <div style="padding-bottom: 10px;"><center><i>Memory</i></center></div>
+                <div>
+                    <div style="display: flex;
+                    flex-direction: column; margin-bottom: 10px; padding: 5px;
+                    border: 1px solid white;">
+                        <input type="text" style="margin:3px;" id="memory_window_start_addr" placeholder="start_addr">
+                        <input type="text" style="margin:3px;" id="memory_window_end_addr" placeholder="end_addr">
+                        <center><input style="margin:3px;" id="memory_show_button" type="button" value="Show"></center>
+                    </div>
+                    <div id="memory_dump_div" style="display: flex;
+                    flex-direction: column; margin-bottom: 10px; padding: 5px;
+                    border: 1px solid white;">
+                        <font size="1px"><p>Please choose <br><b>start_addr</b> and <b>end_addr</b><br> to see memory contents.</p></font>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="scripts">

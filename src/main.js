@@ -30,6 +30,16 @@ document.getElementById("button_compile").addEventListener("click", (event) => {
 
 document.getElementById("button_run").addEventListener("click", (event) => {
     run_program(global.cpu_ctx, editor.getValue());
+    update_register_window();
+});
+
+document.getElementById("button_terminate").addEventListener("click", (event) => {
+    terminate_program();
+    update_register_window();
+});
+
+document.getElementById("memory_show_button").addEventListener("click", (event) => {
+    update_memory_viewer();
 });
 
 editor.on('change', (event) => {

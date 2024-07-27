@@ -27,9 +27,26 @@ const run_program = (cpu_ctx, code_str) => {
         return null;
     }
     cpu_ctx.reset();
+    cpu_ctx.memory.fill(0);
     for(let byte of code[1]) {
         cpu_ctx.set_Mem(byte.addr, byte.data);
     }
-    execute_program(cpu_ctx, code[0]);
+    if(!execute_program(cpu_ctx, code[0])) {
+        alert("[Another program is already running!]\n[There may be an infinite loop!]");
+    };
 };
 
+const terminate_program = () => {
+    global.runner_worker_handle.terminate();
+    global.is_running = false;
+    global.cpu_ctx.reset();
+    global.runner_worker_handle = new Worker("runner_worker.js");
+    global.runner_worker_handle.onmessage = (msg_from_runner) => {
+        let msg_data = JSON.parse(msg_from_runner.data);
+        copy_CPU_Context(global.cpu_ctx, msg_data);
+        global.cpu_ctx.log();
+        global.is_running = false;
+        update_register_window();
+        alert("[Program Executed Successfully]");
+    };
+}
