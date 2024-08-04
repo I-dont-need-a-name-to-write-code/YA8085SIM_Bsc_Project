@@ -845,9 +845,12 @@ const generate_machine_code = (code_str) => {
                             // create label fillup request
                             let label_reqs = label_req_hm.get(next.t_data);
                             if(label_reqs === undefined) {
-                                label_req_hm.set(next.t_data, [ mc.length ]); 
+                                let array = new Array(1);
+                                array[0] = mc.length;
+                                label_req_hm.set(next.t_data, array); 
                             } else {
-                                label_req_hm.set(next.t_data, label_reqs.push(mc.length)); 
+                                label_reqs.push(mc.length);
+                                label_req_hm.set(next.t_data, label_reqs); 
                             }
                         }
                     }
