@@ -46,40 +46,47 @@ skip:	INX H
 
 -----------------------------------------------------
 
-# 3rd largest out of 5 numbers
+# Find 3rd largest number
 
 .ORG C000H
 
-_start:	MVI B,02H
-LOOP2:	LXI H,F000H
-	MVI C,05H
-	MVI A,00H
-LOOP1:	CMP M
+_start:	
+	MVI B, 02H
+LOOP2:	
+	LXI H, F000H
+	MVI C, 05H
+	MVI A, 00H
+LOOP1:	
+	CMP M
 	JNC HERE1
-	MOV A,M
-	MOV D,H
-	MOV E,L
-HERE1:	INX H
+	MOV A, M
+	MOV D, H
+	MOV E, L
+HERE1:	
+	INX H
 	DCR C
 	JNZ LOOP1
-	MVI A,00H
+	MVI A, 00H
 	STAX D
 	DCR B
 	JNZ LOOP2
 	
-	LXI H,F000H
-	MVI C,05H
-	MVI A,00H
-LOOP3:	CMP M
+	LXI H, F000H
+	MVI C, 05H
+	MVI A, 00H
+LOOP3:	
+	CMP M
 	JNC HERE2
-	MOV A,M
-HERE2:	INX H
+	MOV A, M
+HERE2:	
+	INX H
 	DCR C
 	JNZ LOOP3
 	HLT
 
 .ORG F000H
 .DB FFH 32H 23H 85H 45H
+
 
 # factorial
 .org 8000H
@@ -157,3 +164,26 @@ break:
     INX H
     MOV M, B
     HLT
+
+--------------------------------------------
+; this is a comment.
+; the assembler ignores comments
+
+.ORG 9000H
+data: .DB 0AH
+
+.ORG F000H
+_start:
+	LXI H, data
+	MVI A, 05H
+    MOV B, M
+loop:
+	CALL increment_regB
+    DCR A
+    JNZ loop
+    HLT
+
+increment_regB:
+	INR B
+	RET
+

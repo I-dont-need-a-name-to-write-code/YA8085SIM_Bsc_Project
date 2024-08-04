@@ -822,7 +822,7 @@ const generate_machine_code = (code_str) => {
                 let mnemonic = token.t_data.split("_")[0];
                 let n_bytes = mnemonic_hm.get(mnemonic);
                 if(n_bytes === null) {
-                    alert("Major Error: n_bytes(null) at (assembler.js/812).");
+                    alert("Major Error: n_bytes(null) in machine_code_generation function.");
                     return null;
                 }
                 if(n_bytes === 1) {} 
